@@ -1,0 +1,27 @@
+parameters:
+  - name: Environment
+    type: string
+
+  - name: ServiceConnection
+    type: string
+
+stages:
+  - stage: Deploy_${{ parameters.Environment }}
+    displayName: "${{ parameters.Environment }}"
+
+    jobs:
+      - deployment: NETCoreWebAPI
+        displayName: Deploy Core WebAPI
+        environment: "${{ parameters.Environment }}"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+              - task: AzureRmWebAppDeployment@4
+                 displayName: 'Deploy Azure App Service'
+                 inputs:
+                   azureSubscription: '$(Parameters.ConnectedServiceName)'
+                   appType: '$(Parameters.WebAppKind)'
+                   WebAppName: '$(Parameters.WebAppName)'
+                   VirtualApplication: /
+                   packageForLinux: '$(System.DefaultWorkingDirectory)/_WebAPI-Build/drop/src.zip'

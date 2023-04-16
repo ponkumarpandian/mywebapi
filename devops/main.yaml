@@ -1,0 +1,38 @@
+# Batching trigger set run only on a adf_publish branch
+
+resources:
+  repositories:        
+    - repository: MyWebApi
+      type: git
+      name: MyWebApi
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+   
+  # The build agent is based on Windows OS.
+  # Linux agents have some differences in available commands and folder paths expressions, etc
+pool:
+  vmImage: "windows-latest"
+
+stages:
+  # Build  ------------------------------------------------------------
+
+  # Run a build job
+  - template: stages\build.yaml
+    parameters:
+      displayName: "Build .NET Core API"
+
+  # Deploy  ------------------------------------------------------------
+
+  # Deploy to Dev Environment
+  - template: stages\deploy.yaml
+    parameters:
+      Environment: "Dev"
+      ServiceConnection: sc-deploy-api-app
+
+
+
+ 
